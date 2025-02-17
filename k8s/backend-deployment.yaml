@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: game-of-life-api:latest
+          imagePullPolicy: IfNotPresent  # <--- ADICIONE ESTA LINHA
+          env:
+            - name: RAILS_ENV
+              value: "development"
+            - name: SECRET_KEY_BASE
+              value: "09df017e2b08cb91430c87e5638e4e918b273cc3122b77a82e54d4211d42030f30d8"
+            - name: DATABASE_URL
+              value: "postgres://postgres:password@postgres:5432/game_of_life_extendi_development"
+          ports:
+            - containerPort: 3000
+---
+# k8s/backend-deployment.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  selector:
+    app: api
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 31000
